@@ -548,3 +548,13 @@ config SERIAL_OF_PLATFORM
 	  are probed through devicetree, including Open Firmware based
 	  PowerPC systems and embedded systems on architectures using the
 	  flattened device tree format.
+
+config SERIAL_8250_EDGEQ
+	tristate "Support for EDGEQ internal UART (8250 based driver)"
+	depends on SERIAL_8250 && (ARCH_EDGEQ)
+	default	y if ARCH_EDGEQ
+	help
+	  If you have a machine based on an EDGEQ CPU you
+	  can enable its onboard serial ports by enabling this option.
+
+	  This driver uses ttyS instead of ttyO.

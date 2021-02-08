@@ -213,3 +213,32 @@ static int __init early_au_setup(struct earlycon_device *dev, const char *opt)
 OF_EARLYCON_DECLARE(palmchip, "ralink,rt2880-uart", early_au_setup);
 
 #endif
+
+#ifdef CONFIG_SERIAL_8250_EDGEQ
+int __init early_edgeq8250_setup(struct earlycon_device *device,
+					 const char *options)
+{
+	struct uart_port *port = &device->port;
+
+	if (!(device->port.membase || device->port.iobase))
+		return -ENODEV;
+
+	if (!device->baud) {
+		struct uart_port *port = &device->port;
+		unsigned int ier;
+
+		/* assume the device was initialized, only mask interrupts */
+		ier = serial8250_early_in(port, UART_IER);
+		serial8250_early_out(port, UART_IER, ier & UART_IER_UUE);
+	} else
+		init_port(device);
+
+	device->con->write = early_serial8250_write;
+	device->con->read = early_serial8250_read;
+	port->regshift = 3;
+
+	return 0;
+}
+
+OF_EARLYCON_DECLARE(edgeq8250, "ns16550a", early_edgeq8250_setup);
+#endif
