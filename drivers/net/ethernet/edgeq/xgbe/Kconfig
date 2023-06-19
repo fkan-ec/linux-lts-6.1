@@ -6,7 +6,7 @@
 config EDGEQ_XGBE
 	tristate "EdgeQ 10GbE Ethernet driver"
 	default y
-	depends on OF_NET && OF_ADDRESS && HAS_IOMEM
+	depends on OF_ADDRESS && HAS_IOMEM
 	depends on ARM64 || COMPILE_TEST
         select MII
         select MDIO_XPCS
