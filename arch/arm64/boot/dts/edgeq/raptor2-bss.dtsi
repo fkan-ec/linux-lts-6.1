@@ -1,0 +1,285 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ * EdgeQ Raptor2 BSS DTSi
+ */
+
+/ {
+
+	spiclk: virt_100mhz {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <750000000>;
+	};
+
+	bss_uart_clk: bss-uart-clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		/*clock-frequency = <9216000>; FPGA */
+		clock-frequency = <1843200>; /* Divisor = (1843200 / (19200 * 16)) = 6 */
+	};
+
+	spi0: spi@704d0000 {
+		status = "disabled";
+		compatible = "andestech,atcspi200";
+		reg = <0x0 0x704d0000 0x0 0x1000>;
+		num-cs = <1>;
+		interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&spiclk>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-shift = <2>;
+	};
+
+	spi1: spi@70420000 {
+		status = "disabled";
+		compatible = "andestech,atcspi200";
+		reg = <0x0 0x70420000 0x0 0x1000>,
+		      <0x0 0x7044007c 0x0 0x8>; /* workaround for SPI */
+		reg-names = "spi1", "gpio46";
+		num-cs = <1>;
+		interrupts = <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&spiclk>;
+		spi-hw-workaround;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-shift = <2>;
+
+		spidev1: spidev@0 {
+			status = "okay";
+			compatible = "linux,spidev";
+			reg = <0>;
+			spi-max-frequency = <80000000>;
+		};
+	};
+
+	spi2: spi@70430000 {
+		status = "disabled";
+		compatible = "andestech,atcspi200";
+		reg = <0x0 0x70430000 0x0 0x1000>;
+		num-cs = <1>;
+		interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&spiclk>;
+		spi-cpol;
+		spi-cpha;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-shift = <2>;
+
+		spidev2: spidev@0 {
+			status = "okay";
+			compatible = "linux,spidev";
+			reg = <0>;
+			spi-max-frequency = <80000000>;
+		};
+	};
+
+	spi3: spi@68490000 {
+		status = "disabled";
+		compatible = "andestech,atcspi200";
+		reg = <0x0 0x68490000 0x0 0x1000>;
+		num-cs = <1>;
+		//interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&spiclk>;
+		spi-cpol;
+		spi-cpha;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-shift = <1>;
+		read_cs_toggle_quirk;
+
+		spidev3: spidev@0 {
+			status = "okay";
+			compatible = "linux,spidev";
+			reg = <0>;
+			spi-max-frequency = <50000000>;
+		};
+	};
+
+	spi4: spi@68491000 {
+		status = "disabled";
+		compatible = "andestech,atcspi200";
+		reg = <0x0 0x68491000 0x0 0x1000>;
+		num-cs = <1>;
+		//interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&spiclk>;
+		spi-cpol;
+		spi-cpha;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-shift = <1>;
+		read_cs_toggle_quirk;
+
+		spidev4: spidev@0 {
+			status = "okay";
+			compatible = "linux,spidev";
+			reg = <0>;
+			spi-max-frequency = <50000000>;
+		};
+	};
+
+	bss_serial0: bss-serial@70434000 {
+		status = "disabled";
+		device_type = "serial";
+		compatible = "ns16550a";
+		reg = <0 0x70434000 0x0 0x1000>;
+		reg-shift = <3>;
+		reg-offset = <0x40>;
+                reg-io-width = <4>;
+                clocks = <&bss_uart_clk>;
+                /*clock-frequency = <9216000>; FPGA */
+                clock-frequency = <1843200>;
+		interrupts = <GIC_SPI 6 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	bss_serial1: bss-serial@70438000 {
+		status = "disabled";
+		device_type = "serial";
+		compatible = "ns16550a";
+		reg = <0 0x70438000 0x0 0x1000>;
+		reg-shift = <3>;
+		reg-offset = <0x40>;
+                reg-io-width = <4>;
+                clocks = <&bss_uart_clk>;
+                /*clock-frequency = <9216000>; FPGA */
+                clock-frequency = <1843200>;
+		interrupts = <GIC_SPI 5 IRQ_TYPE_LEVEL_HIGH>;
+
+		gnss {
+			status = "disabled";
+			compatible = "u-blox,neo-8";
+			current-speed = <9600>;
+			interrupts = <GIC_SPI 231 IRQ_TYPE_EDGE_RISING>;
+		};
+	};
+
+	bss_serial2: bss-serial@7043c000 {
+		status = "disabled";
+		device_type = "serial";
+		compatible = "ns16550a";
+		reg = <0 0x7043c000 0x0 0x1000>;
+		reg-shift = <3>;
+		reg-offset = <0x40>;
+                reg-io-width = <4>;
+                clocks = <&bss_uart_clk>;
+                /*clock-frequency = <9216000>; FPGA */
+                clock-frequency = <1843200>;
+		interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	edacmc: memory-controller@6f7fe000 {
+		status = "disabled";
+		compatible = "edgeq,raptor2-ddrc";
+		reg = <0 0x6f7fe000 0x0 0x1000>;
+		interrupts = <GIC_SPI 122 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>;
+        };
+
+	i2cclk: virt_100mhz {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <1500000000>;
+	};
+
+	i2c0: i2c@70400000 {
+		status = "disabled";
+		compatible = "edgeq,raptor2-i2c";
+		reg = <0 0x70400000 0x0 0x1000>;
+		reg-shift = <2>;
+		interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&i2cclk>;
+		clock-frequency = <100000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		tpm = <29>;
+		t_sp = <3>;
+		t_sudat = <7>;
+		t_hddat = <10>;
+		t_sclhi = <245>;
+	};
+
+	i2c1: i2c@70408000 {
+		status = "disabled";
+		compatible = "edgeq,raptor2-i2c";
+		reg = <0 0x70408000 0x0 0x1000>;
+		reg-shift = <2>;
+		interrupts = <GIC_SPI 8 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&i2cclk>;
+		clock-frequency = <100000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		tpm = <29>;
+		t_sp = <3>;
+		t_sudat = <7>;
+		t_hddat = <10>;
+		t_sclhi = <245>;
+	};
+
+	i2c2: i2c@70410000 {
+		status = "disabled";
+		compatible = "edgeq,raptor2-i2c";
+		reg = <0 0x70410000 0x0 0x1000>;
+		reg-shift = <2>;
+		interrupts = <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&i2cclk>;
+		clock-frequency = <100000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		tpm = <29>;
+		t_sp = <3>;
+		t_sudat = <7>;
+		t_hddat = <10>;
+		t_sclhi = <245>;
+	};
+
+	dctcxo0: dctcxo {
+		status = "disabled";
+		compatible = "sitime,si5357";
+		bus = <0x0>;
+		addr = <0x60>;
+	};
+
+	mmcclk_core: virt_46mhz {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <46000000>;
+	};
+
+	emmc: mmc@70500000 {
+		status = "disabled";
+		compatible = "edgeq,raptor2-sdhci";
+		reg = <0x0 0x70500000 0x0 0x1000>;
+		interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&mmcclk_core>;
+		clock-names = "core";
+		bus-width = <4>;
+		fifo-depth = <0x100>;
+		reg-shift = <2>;
+		non-removable;
+		no-sd;
+		no-sdio;
+		raptor2_a0;
+	};
+
+	stmr: stmr@400F20000 {
+		status = "disabled";
+		compatible = "edgeq,raptor2-stmr";
+		reg = <0x0 0x69080540 0x0 0x4>,	// SIF addr
+		      <0x0 0x3CB2002C 0x0 0x4>;	// IOSS mux addr
+		stmr-shm-addr = <0x4 0x00F20000>;
+		interrupt-parent = <&gic>;
+		interrupts = <GIC_SPI 19 IRQ_TYPE_EDGE_RISING>;
+	};
+
+	gpio_syscon: gpio@70440000 {
+		compatible = "eq,raptor2-gpio-syscon", "syscon";
+		reg = <0x0 0x70440000 0x0 0x98>;
+	};
+
+	reset: reset@400F10000 {
+		status = "disabled";
+		compatible = "edgeq,raptor2-reboot";
+		reset-shm-addr = <0x4 0x00F10000>;
+	};
+};

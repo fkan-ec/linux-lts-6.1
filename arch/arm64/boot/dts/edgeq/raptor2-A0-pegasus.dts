@@ -1,0 +1,57 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ *
+ * Raptor2 Platform
+ */
+
+/dts-v1/;
+
+#include "raptor2-A0.dts"
+
+/ {
+	eq_syscon0: eq_syscon {
+		compatible = "edgeq,syscon";
+		eq_sif_syscon = <&sif_syscon>;
+		eq_gpio_syscon = <&gpio_syscon>;
+		sif_conf = <0x3ac 0x00001D00>, /* XGMAC 1PPS -> GPIO39  */
+			   <0xF0 0x00002000>;  /* same as above, set GPIO39's msb */
+		gpio_conf = <0x6C 0x00081E50>; /* enable GPIO38 output mode
+						* and increase drive strength
+						*/
+	};
+};
+
+&ether0 {
+	mac-mode = "sgmii";
+	phy-mode = "sgmii";
+	snps,ps-speed = <2500>;
+	max-speed = <2500>;
+	phy-addr = <0x7>;
+	status = "ok";
+};
+
+&ether1 {
+	status = "ok";
+};
+
+&ether2 {
+	status = "disabled";
+};
+
+&ether3 {
+	status = "disabled";
+};
+
+&ether4 {
+	status = "disabled";
+};
+
+&usb1 {
+	status = "disabled";
+};
+
+&armv8_arch_timer {
+	clock-frequency = <40960000>;
+};

@@ -1,0 +1,205 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ *
+ * Raptor2 Platform
+ */
+
+/dts-v1/;
+
+#define DDR_BASE_ADDR           0x400000000
+#define DDR_BASE_ADDR_MSB       (DDR_BASE_ADDR >> 32)
+#define DDR_GNB_BASE_ADDR_MSB	(DDR_BASE_ADDR_MSB + 1)
+
+
+/*
+ * First 16MB are reserved for ATF, BSS Runtime Services
+ */
+/memreserve/ DDR_BASE_ADDR 0x01000000;
+
+#include "raptor2-cpuss.dtsi"
+#include "raptor2-ioss.dtsi"
+#include "raptor2-bss.dtsi"
+#include "raptor2-su-engines.dtsi"
+#include "raptor2-exmgr.dtsi"
+
+/ {
+	chosen {
+		bootargs = "root=/dev/ram0 rw earlycon=edgeq8250,mmio32,0x70434040
+			    console=ttyS0,115200 mem=96M maxcpus=13 \
+			    uio_pdrv_genirq.of_id=generic-uio";
+		stdout-path = "serial0:115200n8";
+	};
+
+	aliases {
+		serial0 = &bss_serial0;
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <DDR_BASE_ADDR_MSB 0x00000000 0x2 0x00000000>; /*To be filled by bootloader*/
+		numa-node-id = <0>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+	};
+	/* 64KB before 16MB offset reserved for dma */
+	emmc_memory: buffer-ddr-off@FF0000 {
+			reg = <DDR_BASE_ADDR_MSB 0x00FF0000 0x0 0x00010000>;
+			no-map;
+		     };
+
+	LMEM_RANGE: lmem@18000000 {
+			reg = <0x0 0x18000000 0x0 0x17FFFFFF>;
+			no-map;
+		    };
+
+	edgeq_uio0: edgeq_uio {
+			compatible = "edgeq,raptor2-uio-all";
+			status = "ok";
+	};
+
+	eq_syscon0: eq_syscon {
+		compatible = "edgeq,syscon";
+		eq_sif_syscon = <&sif_syscon>;
+		eq_gpio_syscon = <&gpio_syscon>;
+		sif_conf = <0x3ac 0x00001D00>, /* XGMAC 1PPS -> GPIO39  */
+			   <0xF0 0x00002000>;  /* same as above, set GPIO39's msb */
+		gpio_conf = <0x6C 0x00081E50>; /* enable GPIO38 output mode
+						* and increase drive strength
+						*/
+	};
+};
+
+
+&armv8_arch_timer {
+	clock-frequency = <40000000>;
+};
+
+&dsu_c0 {
+	status = "ok";
+
+	cpus =	<&E1_C0_0>, <&E1_C0_1>, <&E1_C1_0>, <&E1_C1_1>, <&E1_C2_0>,
+		<&E1_C2_1>, <&E1_C3_0>, <&E1_C3_1>, <&E1_C4_0>, <&E1_C4_1>,
+		<&E1_C5_0>, <&E1_C5_1>;
+
+};
+
+&dsu_p0 {
+	status = "ok";
+	cpus =	<&E1_P0_0>, <&E1_P0_1>, <&E1_P1_0>, <&E1_P1_1>;
+};
+
+&cmn_pmu {
+	status = "ok";
+};
+
+&armv8_pmuv3{
+	status = "ok";
+};
+
+&bss_serial0 {
+	status = "ok";
+	clock-frequency = <1500000000>;
+};
+
+&spi0 {
+	spi-max-frequency = <80000000>;
+	status = "ok";
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		uboot@0 {
+			reg = <0x0 0x00280000>; /* 2.5MB */
+		};
+
+		rsvd@280000 {
+			reg = <0x00280000 0x00500000>; /* 2.5MB */
+		};
+
+		linux@500000 {
+			reg = <0x00500000 0x00A00000>; /* 5MB */
+		};
+
+		ramdisk@A00000 {
+		reg = <0x00A00000 0x00F80000>; /* 5.5MB */
+		};
+
+		dtb@F80000 {
+		reg = <0x00F80000 0x01000000>; /* 0.5MB */
+		};
+
+		rsvdB@1000000 {
+			reg = <0x1000000 0x1000000>; /* 16MB */
+		};
+	};
+};
+
+&spi1 {
+	status = "ok";
+};
+
+&spi2 {
+	status = "ok";
+};
+
+&spi3 {
+	status = "ok";
+};
+
+&ether0 {
+	mac-mode = "sgmii";
+	phy-mode = "sgmii";
+	snps,ps-speed = <2500>;
+	max-speed = <2500>;
+	phy-addr = <0x7>;
+	status = "ok";
+};
+
+&ether1 {
+	status = "disabled";
+};
+
+&ether2 {
+	status = "disabled";
+};
+
+&ether3 {
+	status = "disabled";
+};
+
+&ether4 {
+	status = "disabled";
+};
+
+&emmc {
+	status = "ok";
+	memory-region = <&emmc_memory>;
+};
+
+&stmr {
+	status = "ok";
+};
+
+&reset {
+	status = "ok";
+};
+
+&edacmc {
+	status = "ok";
+};
+
+&armv8_arch_timer {
+	status = "ok";
+	clock-frequency = <40960000>;
+};

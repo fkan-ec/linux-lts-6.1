@@ -1,0 +1,257 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ *
+ * Raptor2 Platform
+ */
+
+/dts-v1/;
+#define DDR_BASE_ADDR		0x800000000
+#define DDR_BASE_ADDR_MSB	(DDR_BASE_ADDR >> 32)
+#define DDR_GNB_BASE_ADDR_MSB	(DDR_BASE_ADDR_MSB + 1)
+
+/*
+ * First 16MB are reserved for ATF, BSS Runtime Services
+*/
+
+/memreserve/ DDR_BASE_ADDR 0x01000000;
+
+#include "raptor2-b0-cpuss.dtsi"
+#include "raptor2-b0-ioss.dtsi"
+#include "raptor2-b0-bss.dtsi"
+#include "raptor2-b0-su-engines.dtsi"
+#include "raptor2-b0-exmgr.dtsi"
+#include "raptor2-b0-wlan-radio.dtsi"
+
+/ {
+	chosen {
+		bootargs = "root=/dev/ram0 rw earlycon=edgeq8250,mmio32,0x6E450040
+			    console=ttyS0,115200 maxcpus=18 \
+			    uio_pdrv_genirq.of_id=generic-uio";
+		stdout-path = "serial0:115200n8";
+	};
+
+	aliases {
+		serial0 = &bss_serial0;
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <DDR_BASE_ADDR_MSB 0x00000000 0x2 0x00000000>; /*To be filled by bootloader*/
+		numa-node-id = <0>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		SCRATCH: shared-mem-off@1C000000 {
+			reg = <DDR_BASE_ADDR_MSB 0x1C000000 0x0 0x1000>;
+			no-map;
+		};
+
+		COREDUMP: coredump-mem@1C001000 {
+			reg = <DDR_BASE_ADDR_MSB 0x1C001000 0x0 0x100000>;
+			no-map;
+		};
+
+		DDRAPP_MEM: ddrappmem-off@06641000 {
+			reg = <DDR_BASE_ADDR_MSB 0x06641000 0x0 0x019BF000>;
+			no-map;
+		};
+
+		ZEPHYRMEM: zephyr-mem@C0000000 {
+			reg = <DDR_BASE_ADDR_MSB 0xC0000000 0x0 0x40000000>;
+			no-map;
+		};
+
+		DDRGNB: gnb-mem-off@00000000 {
+			reg = <DDR_GNB_BASE_ADDR_MSB 0x00000000 0x0 0xC0000000>;
+			no-map;
+		};
+
+		LOGBUFSU: logbufsu-memory-off@01000000 {
+			reg = <DDR_BASE_ADDR_MSB 0x01000000 0x0 0x05641000>;
+			no-map;
+		};
+
+		LOGBUFRTOS: logbufrtos-memory-off@C0000000 {
+			reg = <DDR_GNB_BASE_ADDR_MSB 0xC0000000 0x0 0x01000000>;
+			no-map;
+		};
+	};
+
+	/* 64KB before 16MB offset reserved for dma */
+	emmc_memory: buffer-ddr-off@FF0000 {
+		reg = <DDR_BASE_ADDR_MSB 0x00FF0000 0x0 0x00010000>;
+		no-map;
+	};
+
+	CRSSREG_MEM: crssreg_mem@64400000 {
+		reg = <0x0 0x64400000 0x0 0x003C0000>;
+		no-map;
+	};
+
+	/*Temporary addition of node to dump logs from
+	buffer(s) in PPU LMEM instead of the DDR*/
+
+	PLMEM_MEM: plmem@1c800000 {
+		reg = <0x0 0x1c800000 0x0 0x00080000>;
+		no-map;
+	};
+
+	CRSSMEMSS_MEM: crssmemss@1c880000 {
+		reg = <0x0 0x1c880000 0x0 0x00080000>;
+		no-map;
+	};
+
+	SPUDLM_MEM: spudlm@68080000 {
+		reg = <0x0 0x68080000 0x0 0x00008000>;
+		no-map;
+	};
+
+	XGMAC0_MEM: xgmac0mem@3c040000 {
+		reg = <0x0 0x3c040000 0x0 0x00040000>;
+		no-map;
+	};
+
+	LMEM_RANGE: lmem@18000000 {
+		reg = <0x0 0x18000000 0x0 0x17FFFFFF>;
+		no-map;
+	};
+
+	ZEPHYR_OCM_UC: ocm-uncached@180000000 {
+		reg = <0x1 0x80000000 0x0 0x00008000>;
+		no-map;
+	};
+
+	ZEPHYR_OCM: ocm-cached@180008000 {
+		reg = <0x1 0x80000000 0x0 0x00028000>;
+		no-map;
+	};
+
+	edgeq_uio0: edgeq_uio {
+		compatible = "edgeq,raptor2-uio-wlan";
+		memory-region = <&CRSSREG_MEM 0x02 0>,
+				 <&PLMEM_MEM 0x02 0>,
+				 <&CRSSMEMSS_MEM 0x02 0>,
+				 <&SPUDLM_MEM 0x02 0>,
+				 <&DDRAPP_MEM 0x03 0>,
+				 <&XGMAC0_MEM 0x02 0>,
+				 <&LOGBUFSU 0x01 0>,
+				 <&LOGBUFRTOS 0x01 0>,
+				 <&SCRATCH 0x01 0>,
+				 <&COREDUMP 0x01 0>,
+				 <&ZEPHYRMEM 0x01 0>,
+				 <&LMEM_RANGE 0X02 0>,
+				 <&ZEPHYR_OCM_UC 0x01 0>,
+				 <&ZEPHYR_OCM 0x01 0>;
+		mem-region-name = "CRSSREG", "PLMEM", "CRSSMEMSS", "SPUDLM", "DDRAPPMEM",
+				  "XGMAC0", "LOGBUFSU", "LOGBUFRTOS", "SCRATCH", "COREDUMP",
+				  "ZEPHYRMEM", "LMEM_RANGE", "ZEPHYR_OCM_UC", "ZEPHYR_OCM";
+		status = "ok";
+	};
+};
+
+&cpu_info {
+	cpu-map {
+		/delete-node/ cluster1;
+	};
+};
+
+/delete-node/ &E1_P0_0;
+/delete-node/ &E1_P0_1;
+/delete-node/ &E1_P1_0;
+/delete-node/ &E1_P1_1;
+/delete-node/ &E1_P2_0;
+/delete-node/ &E1_P2_1;
+/delete-node/ &E1_P3_0;
+/delete-node/ &E1_P3_1;
+
+&armv8_arch_timer {
+	clock-frequency = <61440000>;
+};
+
+&cmn_pmu {
+	status = "ok";
+};
+
+&armv8_pmuv3{
+	status = "ok";
+};
+
+&bss_serial0 {
+	status = "ok";
+	clock-frequency = <1500000000>;
+};
+
+&spi0 {
+	status = "ok";
+};
+
+&spi1 {
+	status = "ok";
+};
+
+&spi2 {
+	status = "ok";
+};
+
+&spi3 {
+	status = "ok";
+};
+
+&i2c0 {
+	status = "ok";
+};
+
+&i2c1 {
+	status = "ok";
+};
+
+&i2c2 {
+	status = "ok";
+};
+
+&ether0 {
+	status = "ok";
+};
+
+&ether1 {
+	status = "ok";
+};
+
+&ether2 {
+	status = "ok";
+};
+
+&ether3 {
+	status = "ok";
+};
+
+&ether4 {
+	status = "ok";
+};
+
+&emmc {
+	status = "ok";
+	memory-region = <&emmc_memory>;
+};
+
+&stmr {
+	status = "ok";
+};
+
+&reset {
+	status = "ok";
+};
+
+&usb1 {
+	status = "ok";
+};
+
+&edacmc {
+	status = "ok";
+};

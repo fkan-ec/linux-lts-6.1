@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ *
+ * Raptor2 Platform
+ */
+
+/dts-v1/;
+
+/memreserve/ 0x400000000 0x01000000;
+
+#include "raptor2-cpuss.dtsi"
+#include "raptor2-ioss.dtsi"
+#include "raptor2-bss.dtsi"
+
+/ {
+	chosen {
+		bootargs = "root=/dev/ram0 rw earlycon=edgeq8250,mmio32,0x70380040
+			    console=ttyS0,19200 maxcpus=16 \
+			    uio_pdrv_genirq.of_id=generic-uio";
+		stdout-path = "serial0:115200n8";
+	};
+
+	aliases {
+		serial0 = &cpuss_serial1;
+	};
+
+	memory@400000000 {
+		device_type = "memory";
+		reg = <0x00000004 0x00000000 0x2 0x00000000>; /* To be filled by bootloader */
+		numa-node-id = <0>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		fapi-memory@440000000 {
+			reg = <0x4 0x40000000 0x0 0x80000000>;
+			no-map;
+		};
+
+		gnb-memory@4C0000000 {
+			reg = <0x4 0xC0000000 0x1 0x00000000>;
+			no-map;
+		};
+	};
+
+	edgeq_uio0: edgeq_uio {
+		compatible = "edgeq,raptor2-uio-all";
+		status = "ok";
+	};
+};
+
+&cpuss_serial1 {
+	status = "ok";
+};
+/*
+&edacmc {
+	status = "ok";
+};
+*/

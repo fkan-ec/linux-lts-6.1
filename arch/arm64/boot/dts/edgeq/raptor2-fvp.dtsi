@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ * EdgeQ Raptor2 FVP DTSi
+ */
+
+/ {
+
+		v2m_clk24mhz: clk24mhz {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <24000000>;
+			clock-output-names = "v2m:clk24mhz";
+		};
+
+		fvp_serial0: uart@70400000 {
+				compatible = "arm,pl011", "arm,primecell";
+				reg = <0x0 0x70400000 0x0 0x1000>;
+				interrupts = <GIC_SPI  6 IRQ_TYPE_LEVEL_HIGH>;
+				clocks = <&v2m_clk24mhz>, <&v2m_clk24mhz>;
+				clock-names = "uartclk", "apb_pclk";
+				status = "disabled";
+		};
+
+		fvp_serial1: uart@70500000 {
+				compatible = "arm,pl011", "arm,primecell";
+				reg = <0x0 0x70500000 0x0 0x1000>;
+				interrupts = <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
+				clocks = <&v2m_clk24mhz>, <&v2m_clk24mhz>;
+				clock-names = "uartclk", "apb_pclk";
+				status = "disabled";
+		};
+
+		virtio-net@71800000 {
+				compatible = "virtio,mmio";
+				reg = <0x0 0x71800000 0x0 0x1000>;
+				interrupts = <GIC_SPI  8 IRQ_TYPE_LEVEL_HIGH>;
+				status = "ok";
+		};
+
+		virtio-block@71900000 {
+				compatible = "virtio,mmio";
+				reg = <0x0 0x71900000 0x0 0x1000>;
+				interrupts = <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>;
+				status = "ok";
+		};
+
+
+
+		virtio-9p@71A00000 {
+				compatible = "virtio,mmio";
+				reg = <0x0 0x71A00000 0x0 0x1000>;
+				interrupts = <GIC_SPI  10 IRQ_TYPE_LEVEL_HIGH>;
+				status = "ok";
+		};
+
+		otrx_lmem@0x1c000000 {
+				compatible = "generic-uio";
+				reg = <0x0 0x1C000000 0x0 0x80000>;
+		};
+
+		ocm@0x180000000 {
+				compatible = "generic-uio";
+				reg = <0x1 0x80000000 0x0 0x40000>;
+		};
+};

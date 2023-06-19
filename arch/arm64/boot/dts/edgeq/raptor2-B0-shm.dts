@@ -1,0 +1,144 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ *
+ * Raptor2 Platform
+ */
+
+/dts-v1/;
+
+#define DDR_BASE_ADDR           0x800000000
+#define DDR_BASE_ADDR_MSB       (DDR_BASE_ADDR >> 32)
+#define DDR_GNB_BASE_ADDR_MSB	(DDR_BASE_ADDR_MSB + 1)
+
+/*
+* First 16MB are reserved for ATF, BSS Runtime Services
+*/
+
+/memreserve/ DDR_BASE_ADDR 0x01000000;
+
+#include "raptor2-b0-cpuss.dtsi"
+#include "raptor2-b0-ioss.dtsi"
+#include "raptor2-b0-bss.dtsi"
+#include "raptor2-b0-su-engines.dtsi"
+
+/ {
+	chosen {
+		bootargs = "root=/dev/ram0 rw earlycon=edgeq8250,mmio32,0x6E450040
+			    console=ttyS0,115200 maxcpus=18 \
+			    uio_pdrv_genirq.of_id=generic-uio";
+		stdout-path = "serial0:115200n8";
+	};
+
+	aliases {
+		serial0 = &bss_serial0;
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <DDR_BASE_ADDR_MSB 0x00000000 0x2 0x00000000>; /*To be filled by bootloader*/
+		numa-node-id = <0>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		LOGBUFSU: logbufsu-mem-off@01000000 {
+			reg = <DDR_BASE_ADDR_MSB 0x01000000 0x0 0x05641000>;
+			no-map;
+		};
+
+		DDRFAPIMEM: fapi-mem-off@80000000 {
+			reg = <DDR_BASE_ADDR_MSB 0x80000000 0x0 0x60000000>;
+			no-map;
+		};
+
+		DDRGNBMEM: gnb-mem-off@00000000 {
+			reg = <DDR_GNB_BASE_ADDR_MSB 0x00000000 0x0 0xC0000000>;
+			no-map;
+		};
+	};
+	/* 64KB before 16MB offset reserved for dma */
+	emmc_memory: buffer-ddr-off@FF0000 {
+		reg = <DDR_BASE_ADDR_MSB 0x00FF0000 0x0 0x00010000>;
+		no-map;
+	};
+
+	edgeq_uio0: edgeq_uio {
+		compatible = "edgeq,raptor2-uio-all";
+		status = "ok";
+	};
+
+};
+
+&armv8_arch_timer {
+	clock-frequency = <61440000>;
+};
+
+&dsu_c0 {
+	status = "ok";
+
+	cpus =	<&E1_C0_0>, <&E1_C0_1>, <&E1_C1_0>, <&E1_C1_1>, <&E1_C2_0>,
+		<&E1_C2_1>, <&E1_C3_0>, <&E1_C3_1>, <&E1_C4_0>, <&E1_C4_1>;
+
+};
+
+&dsu_p0 {
+	status = "ok";
+	cpus =	<&E1_P0_0>, <&E1_P0_1>, <&E1_P1_0>, <&E1_P1_1>,
+		<&E1_P2_0>, <&E1_P2_1>, <&E1_P3_0>, <&E1_P3_1>;
+};
+
+
+&armv8_pmuv3{
+	status = "ok";
+};
+
+&bss_serial0 {
+	status = "ok";
+	clock-frequency = <1500000000>;
+};
+
+&i2c0 {
+	status = "ok";
+};
+
+&i2c1 {
+	status = "ok";
+};
+
+&i2c2 {
+	status = "ok";
+};
+
+&ether0 {
+	status = "ok";
+};
+
+&ether1 {
+	status = "ok";
+};
+
+&ether2 {
+	status = "ok";
+};
+
+&ether3 {
+	status = "ok";
+};
+
+&ether4 {
+	status = "ok";
+};
+
+&emmc {
+	status = "ok";
+	memory-region = <&emmc_memory>;
+};
+
+&stmr {
+	status = "ok";
+};

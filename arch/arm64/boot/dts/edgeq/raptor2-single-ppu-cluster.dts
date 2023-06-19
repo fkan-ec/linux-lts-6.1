@@ -1,0 +1,255 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ *
+ * Raptor2 Platform
+ */
+
+/dts-v1/;
+#define DDR_BASE_ADDR		0x400000000
+#define DDR_BASE_ADDR_MSB	(DDR_BASE_ADDR >> 32)
+#define DDR_GNB_BASE_ADDR_MSB	(DDR_BASE_ADDR_MSB + 1)
+
+/memreserve/ DDR_BASE_ADDR 0x40000000;
+
+#include "raptor2-cpuss.dtsi"
+#include "raptor2-ioss.dtsi"
+#include "raptor2-bss.dtsi"
+
+/ {
+	chosen {
+		bootargs = "root=/dev/ram0 rw earlycon=edgeq8250,mmio32,0x70434040
+			    console=ttyS0,19200 maxcpus=16 \
+			    uio_pdrv_genirq.of_id=generic-uio";
+		stdout-path = "serial0:115200n8";
+	};
+
+	aliases {
+		serial0 = &bss_serial0;
+	};
+
+	memory@400000000 {
+		device_type = "memory";
+		reg = <DDR_BASE_ADDR_MSB 0x00000000 0x2 0x00000000>; /*To be filled by bootloader*/
+		numa-node-id = <0>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		fapi-mem-off@40000000 {
+			reg = <DDR_BASE_ADDR_MSB 0x40000000 0x0 0x80000000>;
+			no-map;
+		};
+
+		gnb-mem-off@C0000000 {
+			reg = <DDR_GNB_BASE_ADDR_MSB 0xC0000000 0x1 0x00000000>;
+			no-map;
+		};
+	};
+
+	edgeq_uio0: edgeq_uio {
+		compatible = "edgeq,raptor2-uio-all";
+		status = "ok";
+	};
+
+};
+
+&cpu_info {
+	cpu-map {
+		/delete-node/ cluster0;
+	};
+};
+
+/delete-node/ &E1_C0_0;
+/delete-node/ &E1_C0_1;
+/delete-node/ &E1_C1_0;
+/delete-node/ &E1_C1_1;
+/delete-node/ &E1_C2_0;
+/delete-node/ &E1_C2_1;
+/delete-node/ &E1_C3_0;
+/delete-node/ &E1_C3_1;
+/delete-node/ &E1_C4_0;
+/delete-node/ &E1_C4_1;
+
+&gic {
+	reg = <0x1 0x40000000 0x0 0x40000>, /* GICD */
+	      <0x1 0x401C0000 0x0 0x80000>; /* GICR */
+};
+
+&bss_serial0 {
+	status = "ok";
+};
+
+&pcie_ep0 {
+	status = "ok";
+};
+
+/*
+&edacmc {
+	status = "ok";
+};
+*/
+
+&ether0 {
+	status = "ok";
+	rx-queues-config {
+		queue0 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue1 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue2 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue3 {
+			/delete-property/ interrupt-affinity;
+		};
+	};
+	tx-queues-config {
+		queue0 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue1 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue2 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue3 {
+			/delete-property/ interrupt-affinity;
+		};
+	};
+};
+
+&ether1 {
+	rx-queues-config {
+		queue0 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue1 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue2 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue3 {
+			/delete-property/ interrupt-affinity;
+		};
+	};
+	tx-queues-config {
+		queue0 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue1 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue2 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue3 {
+			/delete-property/ interrupt-affinity;
+		};
+	};
+};
+
+&ether2 {
+	rx-queues-config {
+		queue0 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue1 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue2 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue3 {
+			/delete-property/ interrupt-affinity;
+		};
+	};
+	tx-queues-config {
+		queue0 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue1 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue2 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue3 {
+			/delete-property/ interrupt-affinity;
+		};
+	};
+};
+
+&ether3 {
+	rx-queues-config {
+		queue0 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue1 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue2 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue3 {
+			/delete-property/ interrupt-affinity;
+		};
+	};
+	tx-queues-config {
+		queue0 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue1 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue2 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue3 {
+			/delete-property/ interrupt-affinity;
+		};
+	};
+};
+
+&ether4 {
+	rx-queues-config {
+		queue0 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue1 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue2 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue3 {
+			/delete-property/ interrupt-affinity;
+		};
+	};
+	tx-queues-config {
+		queue0 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue1 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue2 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue3 {
+			/delete-property/ interrupt-affinity;
+		};
+		queue4 {
+			/delete-property/ interrupt-affinity;
+		};
+	};
+};
+

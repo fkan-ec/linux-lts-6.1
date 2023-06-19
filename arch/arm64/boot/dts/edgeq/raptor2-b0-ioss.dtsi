@@ -1,0 +1,501 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ * EdgeQ Raptor2 IOSS DTS
+ */
+
+/ {
+
+	aliases {
+		pcie_rc_link4 = &pcie0;
+		pcie_rc_link3 = &pcie_ccix;
+		pcie_ep_link4 = &pcie_ep0;
+		pcie_ep_link3 = &pcie_ccix_ep0;
+	};
+
+	pcie0: pcie@3C600000 {
+		compatible = "raptor2-pcie-rc";
+		reg = <0x0 0x3C600000 0x0 0x00400000>,  /* IP registers DBI + DBI2 SZ 4MB */
+		      <0xE 0x00000000 0x0 0x08000000>,  /* Configuration space 56GB SZ 128MB */
+		      <0x0 0x3CB00000 0x0 0x100000>;	/* Port Bringup Configuration */
+
+		reg-names = "dbi", "config", "br_up";
+
+		#address-cells = <3>;
+		#size-cells = <2>;
+		device_type = "pci";
+		dma-coherent;
+
+		/* Outbound */
+		ranges = <0x01000000 0x0 0x00000000 0xE 0x09000000 0x0 0x00010000   /* io 64KB */
+			  0x02000000 0x0 0x20000000 0xE 0x0A000000 0x0 0x20000000   /* 32bit non prefetchable mem 512M */
+			  0x43000000 0xE 0x40000000 0xE 0x40000000 0x1 0xC0000000>; /* 64bit prefetchable mem 7GB */
+
+		interrupts = <GIC_SPI 25 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "msi";
+
+		interrupt-map-mask = <0 0 0 0x7>;
+		interrupt-map = <0 0 0 1 &gic 0 27 IRQ_TYPE_LEVEL_HIGH>, /* int_a */
+				<0 0 0 2 &gic 0 28 IRQ_TYPE_LEVEL_HIGH>, /* int_b */
+				<0 0 0 3 &gic 0 29 IRQ_TYPE_LEVEL_HIGH>, /* int_c */
+				<0 0 0 4 &gic 0 30 IRQ_TYPE_LEVEL_HIGH>; /* int_d */
+
+		linux,pci-domain = <0>;
+		num-lanes = <4>;
+		status = "disabled";
+	};
+
+	pcie_ep0: pcie@3C600000 {
+		compatible = "raptor2-pcie-ep";
+		reg = <0x0 0x3C600000 0x0 0x100000>,	/* IP registers 1 DBI SZ 1MB */
+		    <0x0 0x3C800000 0x0 0x100000>,    /* IP registers 2 DBI2 SZ 1MB */
+		    <0x0 0x3C900000 0x0 0x80000>,     /* IP registers 2 ATU unroll SZ 512K */
+		    <0x40 0x00000000 0x1 0x00000000>, /* Configuration space 256GB SZ 4GB */
+		    <0x0 0x3CB00000 0x0 0x100000>,     /* Port Bringup Configuration */
+		    <0x0 0x3C400000 0x0 0x200000>;     /* Link4 Configuration */
+
+		reg-names = "dbi", "dbi2", "atu", "addr_space", "br_up", "lk_reg";
+
+		dma-coherent;
+		raptor2_early_init;
+		num-lanes = <4>;
+		status = "disabled";
+	};
+
+	pcie_ccix_ep0: pcie@3CC00000 {
+		compatible = "raptor2-pcie-ep";
+		reg = <0x0 0x3CC00000 0x0 0x100000>,	/* IP registers 1 DBI SZ 1MB */
+		      <0x0 0x3CD00000 0x0 0x100000>,	/* IP registers 2 DBI2 SZ 1MB */
+		      <0x0 0x3CF00000 0x0 0x100000>,	/* IP registers 2 ATU unroll SZ 1MB */
+		      <0xE 0x00000000 0x1 0x00000000>,	/* Configuration space 56GB SZ 8GB */
+		      <0x0 0x3CB40000 0x0 0x100000>,	/* Port Bringup Configuration */
+		      <0x0 0x3C400000 0x0 0xE0000>;	/* Link4 Configuration */
+		reg-names = "dbi", "dbi2", "atu", "addr_space", "br_up", "lk_reg";
+
+		dma-coherent;
+		ccix_port;
+		num-lanes = <4>;
+		status = "disabled";
+	};
+
+
+	pcie_ccix: pcie@3CC00000 {
+		compatible = "raptor2-pcie-rc";
+		reg = <0x0 0x3CC00000 0x0 0x00400000>,	/* IP registers DBI + DBI2 SZ 4MB */
+		      <0xE 0x00000000 0x0 0x08000000>,	/* Configuration space 56GB SZ 128MB */
+		      <0x0 0x3CB40000 0x0 0x100000>;	/* Port Bringup Configuration */
+		reg-names = "dbi", "config", "br_up";
+
+		#address-cells = <3>;
+		#size-cells = <2>;
+		device_type = "pci";
+		dma-coherent;
+
+		/* Outbound */
+		ranges = <0x01000000 0x0 0x00000000 0xE 0x09000000 0x0 0x00010000   /* io 64KB */
+			  0x02000000 0x0 0x20000000 0xE 0x0A000000 0x0 0x20000000   /* 32bit non prefetchable mem 512M */
+			  0x43000000 0xE 0x40000000 0xE 0x40000000 0x1 0xC0000000>; /* 64bit prefetchable mem 7GB */
+
+		interrupts = <GIC_SPI 25 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "msi";
+
+		interrupt-map-mask = <0 0 0 0x7>;
+		interrupt-map = <0 0 0 1 &gic 0 33 IRQ_TYPE_LEVEL_HIGH>, /* int_a */
+				<0 0 0 2 &gic 0 34 IRQ_TYPE_LEVEL_HIGH>, /* int_b */
+				<0 0 0 3 &gic 0 35 IRQ_TYPE_LEVEL_HIGH>, /* int_c */
+				<0 0 0 4 &gic 0 36 IRQ_TYPE_LEVEL_HIGH>; /* int_d */
+
+		linux,pci-domain = <0>;
+		num-lanes = <4>;
+		status = "disabled";
+	};
+
+	clk750mhz: apb-pclk {
+		phandle = <0x8000>;
+		clock-output-names = "clk750mhz";
+		clock-frequency = <750000000>;
+		#clock-cells = <0x0>;
+		compatible = "fixed-clock";
+	};
+
+	aliases {
+		ethernet0 = &ether0;
+		ethernet1 = &ether1;
+		ethernet2 = &ether2;
+		ethernet3 = &ether3;
+		ethernet4 = &ether4;
+	};
+
+	ether0: ethernet@3C040000 {
+		compatible = "edgeq,xgbe";
+		reg = <0x0 0x3C040000 0x0 0x40000>,     // XGMAC/XLGMAC addr
+		      <0x0 0x3C1C0000 0x0 0x40000>,     // XPCS/XLGPCS addr
+		      <0x0 0x1CA00000 0x0 0x15400>,     // eCPRI addr
+		      <0x0 0x3C2C0000 0x0 0x10000>,     // MISC addr; on eth0 only
+		      <0x0 0x3C2F0000 0x0 0x10000>,     // E56 addr; on eth0 only
+		      <0x0 0x6E4400B0 0x0 0x10>;        // BSS addr
+		reg-names = "xgmac", "xpcs", "ecpri", "misc", "e56", "bss";
+		interrupts = <0 383 4>;
+		interrupt-names = "macirq";
+		tx-fifo-depth = <65536>;
+		rx-fifo-depth = <65536>;
+		clocks = <&clk750mhz>, <&clk750mhz>;
+		clock-names = "xgmaceth", "ptp_ref";
+		mac-mode = "usxgmii";
+		phy-mode = "usxgmii";
+		snps,axi-config = <&axi_setup0>;
+		snps,mtl-rx-config = <&mtl_rx_setup0>;
+		snps,mtl-tx-config = <&mtl_tx_setup0>;
+		snps,ps-speed = <10000>;
+		max-speed = <10000>;
+		edgeq,xpcs;
+		//edgeq,ecpri-offload;
+		phy-addr = <0x1>;
+		phy-lane = <0>;
+		eth-link = <2>;
+		managed = "in-band-status";
+		dma-coherent;
+		snps,riwt_en = "true";
+		status = "disabled";
+
+		axi_setup0: xgmac-axi-config {
+			snps,wr_osr_lmt = <0x1f>;
+			snps,rd_osr_lmt = <0x1f>;
+			snps,blen = <256 128 64 32 16 8 0>;
+		};
+
+		mtl_rx_setup0: rx-queues-config {
+			snps,rx-queues-to-use = <2>;
+			queue0 {
+				interrupts = <0 363 4>;
+			};
+			queue1 {
+				interrupts = <0 364 4>;
+			};
+			queue2 {
+				interrupts = <0 365 4>;
+			};
+			queue3 {
+				interrupts = <0 366 4>;
+			};
+		};
+
+		mtl_tx_setup0: tx-queues-config {
+			snps,tx-queues-to-use = <2>;
+			queue0 {
+				interrupts = <0 347 4>;
+			};
+			queue1 {
+				interrupts = <0 348 4>;
+			};
+			queue2 {
+				interrupts = <0 349 4>;
+			};
+			queue3 {
+				interrupts = <0 350 4>;
+			};
+		};
+	};
+
+	ether1: ethernet@3C080000 {
+		compatible = "edgeq,xgbe";
+		reg = <0x0 0x3C080000 0x0 0x40000>,     // XGMAC/XLGMAC addr
+		      <0x0 0x3C200000 0x0 0x40000>,     // XPCS/XLGPCS addr
+		      <0x0 0x1CA15400 0x0 0x15400>;     // eCPRI addr
+		reg-names = "xgmac", "xpcs", "ecpri";
+		interrupts = <0 382 4>;
+		interrupt-names = "macirq";
+		tx-fifo-depth = <32768>;
+		rx-fifo-depth = <32768>;
+		clocks = <&clk750mhz>, <&clk750mhz>;
+		clock-names = "xgmaceth", "ptp_ref";
+		mac-mode = "xlgmii";
+		phy-mode = "xlgmii";
+		snps,axi-config = <&axi_setup1>;
+		snps,mtl-rx-config = <&mtl_rx_setup1>;
+		snps,mtl-tx-config = <&mtl_tx_setup1>;
+		snps,ps-speed = <10000>;
+		max-speed = <10000>;
+		edgeq,xpcs;
+		//edgeq,ecpri-offload;
+		phy-addr = <0x1>;
+		phy-lane = <1>;
+		eth-link = <2>;
+		managed = "in-band-status";
+		dma-coherent;
+		snps,riwt_en = "true";
+		status = "disabled";
+
+		axi_setup1: xgmac-axi-config {
+			snps,wr_osr_lmt = <0x1f>;
+			snps,rd_osr_lmt = <0x1f>;
+			snps,blen = <256 128 64 32 16 8 0>;
+		};
+
+		mtl_rx_setup1: rx-queues-config {
+			snps,rx-queues-to-use = <2>;
+			queue0 {
+				interrupts = <0 367 4>;
+			};
+			queue1 {
+				interrupts = <0 368 4>;
+			};
+			queue2 {
+				interrupts = <0 369 4>;
+			};
+			queue3 {
+				interrupts = <0 370 4>;
+			};
+		};
+
+		mtl_tx_setup1: tx-queues-config {
+			snps,tx-queues-to-use = <2>;
+			queue0 {
+				interrupts = <0 351 4>;
+			};
+			queue1 {
+				interrupts = <0 352 4>;
+			};
+			queue2 {
+				interrupts = <0 353 4>;
+			};
+			queue3 {
+				interrupts = <0 354 4>;
+			};
+		};
+	};
+
+	ether2: ethernet@3C0C0000 {
+		compatible = "edgeq,xgbe";
+		reg = <0x0 0x3C0C0000 0x0 0x40000>,     // XGMAC/XLGMAC addr
+		      <0x0 0x3C240000 0x0 0x40000>,     // XPCS/XLGPCS addr
+		      <0x0 0x1CA2A800 0x0 0x15400>;     // eCPRI addr
+		reg-names = "xgmac", "xpcs", "ecpri";
+		interrupts = <0 381 4>;
+		interrupt-names = "macirq";
+		tx-fifo-depth = <32768>;
+		rx-fifo-depth = <32768>;
+		clocks = <&clk750mhz>, <&clk750mhz>;
+		clock-names = "xgmaceth", "ptp_ref";
+		mac-mode = "xlgmii";
+		phy-mode = "xlgmii";
+		snps,axi-config = <&axi_setup2>;
+		snps,mtl-rx-config = <&mtl_rx_setup2>;
+		snps,mtl-tx-config = <&mtl_tx_setup2>;
+		snps,ps-speed = <10000>;
+		max-speed = <10000>;
+		edgeq,xpcs;
+		//edgeq,ecpri-offload;
+		phy-addr = <0x1>;
+		phy-lane = <2>;
+		eth-link = <2>;
+		managed = "in-band-status";
+		dma-coherent;
+		snps,riwt_en = "true";
+		status = "disabled";
+
+		axi_setup2: xgmac-axi-config {
+			snps,wr_osr_lmt = <0x1f>;
+			snps,rd_osr_lmt = <0x1f>;
+			snps,blen = <256 128 64 32 16 8 0>;
+		};
+
+		mtl_rx_setup2: rx-queues-config {
+			snps,rx-queues-to-use = <2>;
+			queue0 {
+				interrupts = <0 371 4>;
+			};
+			queue1 {
+				interrupts = <0 372 4>;
+			};
+			queue2 {
+				interrupts = <0 373 4>;
+			};
+			queue3 {
+				interrupts = <0 374 4>;
+			};
+		};
+
+		mtl_tx_setup2: tx-queues-config {
+			snps,tx-queues-to-use = <2>;
+			queue0 {
+				interrupts = <0 355 4>;
+			};
+			queue1 {
+				interrupts = <0 356 4>;
+			};
+			queue2 {
+				interrupts = <0 357 4>;
+			};
+			queue3 {
+				interrupts = <0 358 4>;
+			};
+		};
+	};
+
+	ether3: ethernet@3C100000 {
+		compatible = "edgeq,xgbe";
+		reg = <0x0 0x3C100000 0x0 0x40000>,     // XGMAC/XLGMAC addr
+		      <0x0 0x3C280000 0x0 0x40000>,     // XPCS/XLGPCS addr
+		      <0x0 0x1CC00000 0x0 0x15400>;     // eCPRI addr
+		reg-names = "xgmac", "xpcs", "ecpri";
+		interrupts = <0 380 4>;
+		interrupt-names = "macirq";
+		tx-fifo-depth = <32768>;
+		rx-fifo-depth = <32768>;
+		clocks = <&clk750mhz>, <&clk750mhz>;
+		clock-names = "xgmaceth", "ptp_ref";
+		mac-mode = "xlgmii";
+		phy-mode = "xlgmii";
+		snps,axi-config = <&axi_setup3>;
+		snps,mtl-rx-config = <&mtl_rx_setup3>;
+		snps,mtl-tx-config = <&mtl_tx_setup3>;
+		snps,ps-speed = <10000>;
+		max-speed = <10000>;
+		edgeq,xpcs;
+		//edgeq,ecpri-offload;
+		phy-addr = <0x1>;
+		phy-lane = <3>;
+		eth-link = <2>;
+		managed = "in-band-status";
+		dma-coherent;
+		snps,riwt_en = "true";
+		status = "disabled";
+
+		axi_setup3: xgmac-axi-config {
+			snps,wr_osr_lmt = <0x1f>;
+			snps,rd_osr_lmt = <0x1f>;
+			snps,blen = <256 128 64 32 16 8 0>;
+		};
+
+		mtl_rx_setup3: rx-queues-config {
+			snps,rx-queues-to-use = <2>;
+			queue0 {
+				interrupts = <0 375 4>;
+			};
+			queue1 {
+				interrupts = <0 376 4>;
+			};
+			queue2 {
+				interrupts = <0 377 4>;
+			};
+			queue3 {
+				interrupts = <0 378 4>;
+			};
+		};
+
+		mtl_tx_setup3: tx-queues-config {
+			snps,tx-queues-to-use = <2>;
+			queue0 {
+				interrupts = <0 359 4>;
+			};
+			queue1 {
+				interrupts = <0 360 4>;
+			};
+			queue2 {
+				interrupts = <0 361 4>;
+			};
+			queue3 {
+				interrupts = <0 362 4>;
+			};
+		};
+	};
+
+	ether4: ethernet@3C000000 {
+		compatible = "edgeq,xgbe";
+		reg = <0x0 0x3C000000 0x0 0x40000>,     // XGMAC/XLGMAC addr
+		      <0x0 0x3C140000 0x0 0x40000>,     // XPCS/XLGPCS addr
+		      <0x0 0x1CA00000 0x0 0x40000>,     // eCPRI addr
+		      <0x0 0x3C2C0000 0x0 0x10000>,     // MISC addr; on eth0 only
+		      <0x0 0x3C2F0000 0x0 0x10000>,     // E56 addr; on eth0 only
+		      <0x0 0x6E4400B0 0x0 0x10>;        // BSS addr
+		reg-names = "xgmac", "xpcs", "ecpri", "misc", "e56", "bss";
+		interrupts = <0 79 4>;
+		interrupt-names = "macirq";
+		tx-fifo-depth = <32768>;
+		rx-fifo-depth = <32768>;
+		clocks = <&clk750mhz>, <&clk750mhz>;
+		clock-names = "xgmaceth", "ptp_ref";
+		mac-mode = "xlgmii";
+		phy-mode = "xlgmii";
+		snps,axi-config = <&axi_setup4>;
+		snps,mtl-rx-config = <&mtl_rx_setup4>;
+		snps,mtl-tx-config = <&mtl_tx_setup4>;
+		snps,ps-speed = <50000>;
+		max-speed = <50000>;
+		edgeq,xpcs;
+		//edgeq,ecpri-offload;
+		phy-addr = <0x1C>;
+		phy-lane = <0>;
+		eth-link = <1>;
+		managed = "in-band-status";
+		dma-coherent;
+		snps,riwt_en = "true";
+		status = "disabled";
+
+		axi_setup4: xgmac-axi-config {
+			snps,wr_osr_lmt = <0x1f>;
+			snps,rd_osr_lmt = <0x1f>;
+			snps,blen = <256 128 64 32 16 8 0>;
+		};
+
+		mtl_rx_setup4: rx-queues-config {
+			snps,rx-queues-to-use = <2>;
+			queue0 {
+				interrupts = <0 71 4>;
+			};
+			queue1 {
+				interrupts = <0 72 4>;
+			};
+			queue2 {
+				interrupts = <0 73 4>;
+			};
+			queue3 {
+				interrupts = <0 74 4>;
+			};
+		};
+
+		mtl_tx_setup4: tx-queues-config {
+			snps,tx-queues-to-use = <2>;
+			queue0 {
+				interrupts = <0 55 4>;
+			};
+			queue1 {
+				interrupts = <0 56 4>;
+			};
+			queue2 {
+				interrupts = <0 57 4>;
+			};
+			queue3 {
+				interrupts = <0 58 4>;
+			};
+			queue4 {
+				interrupts = <0 59 4>;
+			};
+		};
+	};
+
+	usb1:usb@3CB00000{
+		compatible = "edgeq,dwc3";
+
+		reg =   <0x0 0x3C4E0000 0x0 0x20000>,
+			<0x0 0x3C540000 0x0 0x20000>;
+		reg-names = "bringup", "phy_misc";
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+		status = "disabled";
+
+		dwc3@3C300000 {
+			compatible = "snps,dwc3","synopsys,dwc3";
+			reg = <0 0x3C300000 0x0 0x100000>;
+			interrupts = <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "dwc_usb3";
+			dr_mode = "host";
+			snps,dis-u2-freeclk-exists-quirk;
+			snps,hsphy_interface="utmi";
+			snps,quirk-frame-length-adjustment = <0x20>;
+		};
+	};
+};

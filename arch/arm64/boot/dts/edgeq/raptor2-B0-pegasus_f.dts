@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ *
+ * Raptor2 Platform
+ */
+
+/dts-v1/;
+
+#include "raptor2-B0_f.dts"
+
+/ {
+	compatible = "edgeq,b0-pegasus";
+};
+
+&ether0 {
+	mac-mode = "sgmii";
+	phy-mode = "sgmii";
+	snps,ps-speed = <2500>;
+	max-speed = <2500>;
+	phy-addr = <0x7>;
+	status = "ok";
+};
+
+&ether1 {
+	phy-addr = <0x0>;
+	status = "ok";
+};
+
+&armv8_arch_timer {
+	clock-frequency = <61440000>;
+};

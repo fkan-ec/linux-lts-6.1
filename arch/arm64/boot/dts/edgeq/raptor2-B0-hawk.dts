@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ *
+ * Raptor2 Platform
+ */
+
+/dts-v1/;
+
+#include "raptor2-B0-titan.dts"
+
+/ {
+	compatible = "edgeq,b0-hawk";
+};
+
+&emmc {
+	status = "disabled";
+};
+
+&sdcard {
+	status = "ok";
+	/delete-property/ mmc_coherent;
+	memory-region = <&emmc_memory>;
+};
+
+&ether0 {
+	edgeq,pmd-support;
+	status = "ok";
+};
+
+&ether1 {
+	status = "disabled";
+};

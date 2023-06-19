@@ -1,0 +1,233 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * EdgeQ Inc.
+ *
+ *
+ * Raptor2 Platform
+ */
+
+/dts-v1/;
+#define DDR_BASE_ADDR		0x400000000
+#define DDR_BASE_ADDR_MSB	(DDR_BASE_ADDR >> 32)
+#define DDR_GNB_BASE_ADDR_MSB	(DDR_BASE_ADDR_MSB + 1)
+
+/*
+ * First 16MB are reserved for ATF, BSS Runtime Services
+*/
+
+/memreserve/ DDR_BASE_ADDR 0x01000000;
+
+#include "raptor2-cpuss.dtsi"
+#include "raptor2-ioss.dtsi"
+#include "raptor2-bss.dtsi"
+#include "raptor2-su-engines.dtsi"
+#include "raptor2-exmgr.dtsi"
+#include "raptor2-mtd.dtsi"
+
+/ {
+	chosen {
+		bootargs = "root=/dev/ram0 rw earlycon=edgeq8250,mmio32,0x70434040
+			    console=ttyS0,115200 mem=96M maxcpus=13 \
+			    uio_pdrv_genirq.of_id=generic-uio";
+		stdout-path = "serial0:115200n8";
+	};
+
+	aliases {
+		serial0 = &bss_serial0;
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <DDR_BASE_ADDR_MSB 0x00000000 0x2 0x00000000>; /*To be filled by bootloader*/
+		numa-node-id = <0>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+	};
+
+	emmc_memory: buffer-ddr-off@FF0000 {
+			/* 64KB before 16MB offset reserved for dma */
+			reg = <DDR_BASE_ADDR_MSB 0x00FF0000 0x0 0x00010000>;
+			no-map;
+		     };
+
+	ADMAREG_MEM: admaregmem@60500000 {
+			reg = <0x0 0x60500000 0x0 0x00004000>;
+			no-map;
+		     };
+
+	OCM_MEM: ocmmem@180000000 {
+			reg = <0x1 0x80000000 0x0 0x00030000>;
+			no-map;
+		     };
+
+	OLMEM_MEM: olmem@1c200000 {
+			reg = <0x0 0x1c200000 0x0 0x00040000>;
+			no-map;
+		     };
+
+	PLMEM_MEM: plmem@1c800000 {
+			reg = <0x0 0x1c800000 0x0 0x00080000>;
+			no-map;
+		    };
+
+	MXL1REG_MEM: mxl1reg@62400000 {
+			reg = <0x0 0x62400000 0x0 0x00A00000>;
+			no-map;
+		    };
+
+	MXL2REG_MEM: mxl2reg@63400000 {
+			reg = <0x0 0x63400000 0x0 0x00A00000>;
+			no-map;
+		};
+
+	CRSSREG_MEM: crssreg_mem@64400000 {
+			reg = <0x0 0x64400000 0x0 0x003C0000>;
+			no-map;
+		    };
+
+	CRSSMEMSS_MEM: crssmemss@1c880000 {
+			reg = <0x0 0x1c880000 0x0 0x00080000>;
+			no-map;
+		    };
+
+	SPUDLM_MEM: spudlm@68080000 {
+			reg = <0x0 0x68080000 0x0 0x00008000>;
+			no-map;
+		    };
+
+	XGMAC0_MEM: xgmac0mem@3c040000 {
+			reg = <0x0 0x3c040000 0x0 0x00040000>;
+			no-map;
+		    };
+
+	LMEM_RANGE: lmem@18000000 {
+			reg = <0x0 0x18000000 0x0 0x17FFFFFF>;
+			no-map;
+		    };
+
+};
+
+
+&armv8_arch_timer {
+	clock-frequency = <40000000>;
+};
+
+&dsu_c0 {
+	status = "ok";
+
+	cpus =	<&E1_C0_0>, <&E1_C0_1>, <&E1_C1_0>, <&E1_C1_1>, <&E1_C2_0>,
+		<&E1_C2_1>, <&E1_C3_0>, <&E1_C3_1>, <&E1_C4_0>, <&E1_C4_1>,
+		<&E1_C5_0>, <&E1_C5_1>;
+
+};
+
+&dsu_p0 {
+	status = "ok";
+	cpus =	<&E1_P0_0>, <&E1_P0_1>, <&E1_P1_0>, <&E1_P1_1>;
+};
+
+&cmn_pmu {
+	status = "ok";
+};
+
+&armv8_pmuv3{
+	status = "ok";
+};
+
+&bss_serial0 {
+	status = "ok";
+	clock-frequency = <1500000000>;
+};
+
+&bss_serial1 {
+	status = "ok";
+	clock-frequency = <1500000000>;
+	gnss {
+		status = "okay";
+	};
+};
+
+&spi0 {
+	status = "ok";
+};
+
+&spi1 {
+	status = "ok";
+};
+
+&spi2 {
+	status = "ok";
+};
+
+&spi3 {
+	/delete-property/ spi-cpol;
+	/delete-property/ spi-cpha;
+	status = "ok";
+};
+
+&spi4 {
+	/delete-property/ spi-cpol;
+	/delete-property/ spi-cpha;
+	status = "ok";
+};
+
+&i2c0 {
+	status = "ok";
+};
+
+&i2c1 {
+	status = "ok";
+};
+
+&i2c2 {
+	status = "ok";
+};
+
+&ether0 {
+	status = "ok";
+};
+
+&ether1 {
+	status = "ok";
+};
+
+&ether2 {
+	status = "ok";
+};
+
+&ether3 {
+	status = "ok";
+};
+
+&ether4 {
+	status = "ok";
+};
+
+&emmc {
+	status = "ok";
+	memory-region = <&emmc_memory>;
+};
+
+&stmr {
+	status = "ok";
+};
+
+&reset {
+	status = "ok";
+};
+
+&usb1 {
+	status = "ok";
+};
+
+&edacmc {
+	status = "ok";
+};
+
+&rfgpio {
+	status = "ok";
+};
