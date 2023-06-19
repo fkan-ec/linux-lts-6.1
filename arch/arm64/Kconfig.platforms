@@ -94,6 +94,12 @@ config ARCH_BITMAIN
 	help
 	  This enables support for the Bitmain SoC Family.
 
+config ARCH_EDGEQ
+	bool "EDGEQ Platforms"
+	select UIO
+	help
+	  This enables support for the ARMv8 based EdgeQ chipsets.
+
 config ARCH_EXYNOS
 	bool "ARMv8 based Samsung Exynos SoC family"
 	select COMMON_CLK_SAMSUNG
