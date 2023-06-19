@@ -36,6 +36,7 @@ obj-$(CONFIG_DM9000) += davicom/
 obj-$(CONFIG_DNET) += dnet.o
 obj-$(CONFIG_NET_VENDOR_DEC) += dec/
 obj-$(CONFIG_NET_VENDOR_DLINK) += dlink/
+obj-$(CONFIG_NET_VENDOR_EDGEQ) += edgeq/
 obj-$(CONFIG_NET_VENDOR_EMULEX) += emulex/
 obj-$(CONFIG_NET_VENDOR_ENGLEDER) += engleder/
 obj-$(CONFIG_NET_VENDOR_EZCHIP) += ezchip/
